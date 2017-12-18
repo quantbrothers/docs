@@ -1,0 +1,11 @@
+D:\Source\QuickFIXExchangeExample\QuickFIXExchangeExample\bin\Debug\netcoreapp2.0\QuickFIXExchangeExample.deps.json
+D:\Source\QuickFIXExchangeExample\QuickFIXExchangeExample\bin\Debug\netcoreapp2.0\QuickFIXExchangeExample.runtimeconfig.json
+D:\Source\QuickFIXExchangeExample\QuickFIXExchangeExample\bin\Debug\netcoreapp2.0\QuickFIXExchangeExample.runtimeconfig.dev.json
+D:\Source\QuickFIXExchangeExample\QuickFIXExchangeExample\bin\Debug\netcoreapp2.0\QuickFIXExchangeExample.dll
+D:\Source\QuickFIXExchangeExample\QuickFIXExchangeExample\obj\Debug\netcoreapp2.0\QuickFIXExchangeExample.csproj.CoreCompileInputs.cache
+D:\Source\QuickFIXExchangeExample\QuickFIXExchangeExample\obj\Debug\netcoreapp2.0\QuickFIXExchangeExample.AssemblyInfoInputs.cache
+D:\Source\QuickFIXExchangeExample\QuickFIXExchangeExample\obj\Debug\netcoreapp2.0\QuickFIXExchangeExample.AssemblyInfo.cs
+D:\Source\QuickFIXExchangeExample\QuickFIXExchangeExample\bin\Debug\netcoreapp2.0\QuickFIXExchangeExample.pdb
+D:\Source\QuickFIXExchangeExample\QuickFIXExchangeExample\obj\Debug\netcoreapp2.0\QuickFIXExchangeExample.dll
+D:\Source\QuickFIXExchangeExample\QuickFIXExchangeExample\obj\Debug\netcoreapp2.0\QuickFIXExchangeExample.pdb
+D:\Source\QuickFIXExchangeExample\QuickFIXExchangeExample\bin\Debug\netcoreapp2.0\FIX_Spec_44.xml
