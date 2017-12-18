@@ -22,8 +22,6 @@ message which represents
 
 After connecting and logging on, the client can either request a security list or subscribe to market data.
 
-Server does not resend messages on a market data channel. Instead, Server will send a `Sequence Reset <4>` message with `GapFillFlag <123>` field set to Y and the new sequence number in the `MsgSeqNum <34>` field.
-
 
 **Security list**
 
@@ -41,9 +39,9 @@ When a client disconnects for any reason, the market data subscription is termin
 
 1. Client sends a `Market Data Request <V>`
 2. Server responds by sending one Market Data - `Snapshot/Full Refresh <W>`
-3. As bids, offers, trades and/or auctions happen on the exchange, Server sends Market Data - `Incremental Refresh <X>` messages
+3. As bids, offers, trades and/or actions happen on the exchange, Server sends Market Data - `Incremental Refresh <X>` messages
 
-*.*FIX 4.4 EP 26 is used to backport MDEntryType (269) = Q Auction Clearing Price to denote indicative and final auction prices.*
+*.*FIX 4.4 EP 26 is used to backport MDEntryType (269) = Q Action Clearing Price to denote indicative and final action prices.*
 
 
 ## Logon < A> message
@@ -64,9 +62,10 @@ The `Logout <5>` message initiates or confirms the termination of a FIX session.
 
 ## New Order Single < D> message
 
-To submit a new order to server, send a `New Order Single <D>` message.Server will respond to a `New Order Single <D>` message with an `Execution Report <8>`.
+To submit a new order to server, send a `New Order Single <D>` message. Server will respond to a `New Order Single <D>` message with an `Execution Report <8>`.
 
->For lib Quickfix
+>For lib Quickfix<br>
+>[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 ```csharp
  NewOrderSingle newOrderSingle = new NewOrderSingle(
@@ -155,6 +154,7 @@ Tag|Name|Req|Description
 The order cancel/replace request is used to change the parameters of an existing order. Do not use this message to cancel the remaining quantity of an outstanding order, use the `Order Cancel Request <F>` message for this purpose.
 
 >For lib Quickfix
+>[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 ```csharp
 OrderCancelReplaceRequest orderCancelReplaceRequest = new OrderCancelReplaceRequest(
@@ -212,6 +212,7 @@ Tag|Name|Req|Description
 The `Order Cancel Request <F>` message requests the cancellation of all of the remaining quantity of an existing order.
 
 >For lib Quickfix
+>[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 ```csharp
 OrderCancelRequest orderCancelRequest = new OrderCancelRequest(
@@ -259,6 +260,7 @@ Tag|Name|Req|Description
 The `Order Status Request <H>` message is used by the client to generate an order status message (`Execution Report <8>` message) back from the server.
 
 >For lib Quickfix
+>[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 ```csharp
 OrderStatusRequest orderStatusRequest = new OrderStatusRequest(
@@ -283,6 +285,7 @@ Response on `Order Status Request <H>` is an `Execution Report <8>` message with
 The `Order Mass Status Request <AF>` message requests the status for orders matching criteria specified within the request.
 
 >For lib Quickfix
+>[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 ```csharp
 OrderMassStatusRequest orderMassStatusRequest = new OrderMassStatusRequest(
@@ -314,6 +317,7 @@ Responses on `Order Mass Status Request <AF>` message is an `Execution Reports <
 The `Security List Request <x>` message is used to return a list of securities from the server that match criteria provided on the request.
 
 >For lib Quickfix
+>[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 ```csharp
 SecurityListRequest securityListRequest = new SecurityListRequest(
@@ -362,6 +366,7 @@ Tag|Name|Req|Description
 Subscribes the current session to a Market Data - `Snapshot/Full Refresh <W>` followed by zero or more Market Data - `Incremental Refresh <X>` messages.
 
 >For lib Quickfix
+>[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 ```csharp
 MarketDataRequest marketDataRequest = new MarketDataRequest(
