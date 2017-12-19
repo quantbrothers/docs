@@ -64,14 +64,13 @@ The `Logout <5>` message initiates or confirms the termination of a FIX session.
 
 To submit a new order to server, send a `New Order Single <D>` message. Server will respond to a `New Order Single <D>` message with an `Execution Report <8>`.
 
->For lib Quickfix<br>
->[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
+>For lib Quickfix
 
 ```csharp
  NewOrderSingle newOrderSingle = new NewOrderSingle(
-                clOrdId,
-                symbol,
-                side,
+                new ClOrdId("00000000-0000-0000-0000-000000000001"),
+                new Symbol("BTC/USD"),
+                new Side(Side.BUY),
                 new TransactTime(DateTime.Now),
                 new OrdType(OrdType.LIMIT))
             {
@@ -83,6 +82,8 @@ To submit a new order to server, send a `New Order Single <D>` message. Server w
 
 testFixApp.Send(newOrderSingle);
 ```
+>[*Full example*](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
+
 
 Tag|Name|Req|Description
 ---|----|---|-----------
@@ -116,7 +117,7 @@ Tag|Name|Req|Description
   * No, order is rejected
     * server sends client ← an `Execution Report <8>` indicating the order was rejected with:
       * `ExecType <150>` set to 8 = Rejected
-      * `OrdStatus <39>` set to 8 = [Rejected](#reject-lt-3-gt-message)
+      * `OrdStatus <39>` set to 8 = Rejected
 
 
 ## Execution Report < 8> message
@@ -134,7 +135,7 @@ Tag|Name|Req|Description
 41 | OrigClOrdID | N * (Required if client change ClOrdID in Order Cancel/Replace `Request <G>` message or `Order Cancel Request <F>` message) | Previous unique identifier of the order as assigned by the client if current ClOrdID it was changed
 17 | ExecID | Y | Unique identifier of execution message as assigned by server (0 (zero) for `ExecType <150>` = 8 Rejected)
 150 | ExecType | Y |Describes the purpose of the Execution Report <br>Possible values: <br>	I = Order Status<br>	6 = Pending Cancel<br>	E = Pending <br>Replace<br>	F = Trade<br>	8 = Rejected
-39 | OrdStatus | Y |Describes the current order status <br>Possible values:<br>   A = Pending New<br>   0 = New<br>   1 = Partially filled<br>   2 = Filled<br>   4 = Canceled<br>   8 = [Rejected](#reject-lt-3-gt-message)
+39 | OrdStatus | Y |Describes the current order status <br>Possible values:<br>   A = Pending New<br>   0 = New<br>   1 = Partially filled<br>   2 = Filled<br>   4 = Canceled<br>   8 = Rejected
 58 | Text | N |Error description if contains
 54 | Side | Y | Side of the order.<br>Possible values:<br>   1 = Buy<br>   2 = Sell<br>   B = "As Defined" (when `ExecType <150>` = 8 Rejected and order not found)
 55 | Symbol | Y | Ticker symbol. | Possible "-" when `ExecType <150>` = 8 Rejected and order not found
@@ -154,14 +155,13 @@ Tag|Name|Req|Description
 The order cancel/replace request is used to change the parameters of an existing order. Do not use this message to cancel the remaining quantity of an outstanding order, use the `Order Cancel Request <F>` message for this purpose.
 
 >For lib Quickfix
->[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 ```csharp
 OrderCancelReplaceRequest orderCancelReplaceRequest = new OrderCancelReplaceRequest(
                 new OrigClOrdID(clOrdId.ToString()),
                 clOrdId = new ClOrdID(Guid.NewGuid().ToString()),
-                symbol,
-                side,
+                new Symbol("BTC/USD"),
+                new Side(Side.BUY),
                 new TransactTime(DateTime.Now),
                 new OrdType(OrdType.LIMIT))
             {
@@ -171,6 +171,7 @@ OrderCancelReplaceRequest orderCancelReplaceRequest = new OrderCancelReplaceRequ
             
 testFixApp.Send(orderCancelReplaceRequest);
 ```
+>[*Full example*](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 Tag|Name|Req|Description
 ---|----|---|-----------
@@ -212,26 +213,26 @@ Tag|Name|Req|Description
 The `Order Cancel Request <F>` message requests the cancellation of all of the remaining quantity of an existing order.
 
 >For lib Quickfix
->[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 ```csharp
 OrderCancelRequest orderCancelRequest = new OrderCancelRequest(
                     new OrigClOrdID(clOrdId.ToString()),
                     new ClOrdID(Guid.NewGuid().ToString()),
-                    symbol,
-                    side,
+                    new Symbol("BTC/USD"),
+                    new Side(Side.BUY),
                     new TransactTime(DateTime.Now)
                 )
             { OrderQty = new OrderQty(0.1m) };
 
 testFixApp.Send(orderCancelRequest);
 ```
+>[*Full example*](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 Tag|Name|Req|Description
 ---|----|---|-----------
 11 | ClOrdID | Y | New unique identifier of the existing order as assigned by the client. Uniqueness must be guaranteed by the client for the duration of the lifetime the order. (new if needed, otherwise it can be equal OrigClOrdID)
 41 | OrigClOrdID | Y | Current unique identifier of the order as assigned by the client. 
-38 | OrderQty | Y | Quantity ordered.Needed > 0, but there is nothing to do. Will be try cancellation of all of the remaining quantity.
+38 | OrderQty | Y | Quantity ordered. Needed > 0, but there is nothing to do. Will be try cancellation of all of the remaining quantity.
 54 | Side | Y | Side of the order.<br>Valid values:<br>   1 = Buy<br>   2 = Sell <br>Must be equal of an existing order
 55 | Symbol | Y | Ticker symbol. Common, "human understood" representation of the security. e.g. ETH/BTC<br>Must be equal of an existing order
 60 | TransactTime | Y | Time of request creation
@@ -260,17 +261,17 @@ Tag|Name|Req|Description
 The `Order Status Request <H>` message is used by the client to generate an order status message (`Execution Report <8>` message) back from the server.
 
 >For lib Quickfix
->[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 ```csharp
 OrderStatusRequest orderStatusRequest = new OrderStatusRequest(
                 clOrdId,
-                symbol,
-                side
+                new Symbol("BTC/USD"),
+                new Side(Side.BUY),
                 );
 
 testFixApp.Send(orderStatusRequest);
 ```
+>[*Full example*](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 Tag|Name|Req|Description
 ---|----|---|-----------
@@ -285,7 +286,6 @@ Response on `Order Status Request <H>` is an `Execution Report <8>` message with
 The `Order Mass Status Request <AF>` message requests the status for orders matching criteria specified within the request.
 
 >For lib Quickfix
->[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 ```csharp
 OrderMassStatusRequest orderMassStatusRequest = new OrderMassStatusRequest(
@@ -297,8 +297,8 @@ OrderMassStatusRequest orderMassStatusRequest = new OrderMassStatusRequest(
             };
             
 testFixApp.Send(orderMassStatusRequest);
-
 ```
+>[*Full example*](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 Tag|Name|Req|Description
 ---|----|---|-----------
@@ -317,7 +317,6 @@ Responses on `Order Mass Status Request <AF>` message is an `Execution Reports <
 The `Security List Request <x>` message is used to return a list of securities from the server that match criteria provided on the request.
 
 >For lib Quickfix
->[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 ```csharp
 SecurityListRequest securityListRequest = new SecurityListRequest(
@@ -325,11 +324,12 @@ SecurityListRequest securityListRequest = new SecurityListRequest(
                 new SecurityListRequestType(SecurityListRequestType.SYMBOL)
             )
             {
-                Symbol = symbol
+                Symbol = new Symbol("BTC/USD")
             };
             
 testFixApp.Send(securityListRequest);
 ```
+>[*Full example*](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 Tag|Name|Req|Description
 ---|----|---|-----------
@@ -366,7 +366,6 @@ Tag|Name|Req|Description
 Subscribes the current session to a Market Data - `Snapshot/Full Refresh <W>` followed by zero or more Market Data - `Incremental Refresh <X>` messages.
 
 >For lib Quickfix
->[Example](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 ```csharp
 MarketDataRequest marketDataRequest = new MarketDataRequest(
@@ -388,7 +387,7 @@ var ask = new MarketDataRequest.NoMDEntryTypesGroup()
 
 var symGroup = new MarketDataRequest.NoRelatedSymGroup
             {
-                Symbol = symbol
+                Symbol = new Symbol("BTC/USD")
             };
 
 marketDataRequest.AddGroup(bid);
@@ -397,6 +396,7 @@ marketDataRequest.AddGroup(symGroup);
 
 testFixApp.Send(marketDataRequest);
 ```
+>[*Full example*](https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample)
 
 Tag|Name|Req|Description
 ---|----|---|-----------
