@@ -41,8 +41,6 @@ When a client disconnects for any reason, the market data subscription is termin
 2. Server responds by sending one Market Data - `Snapshot/Full Refresh <W>`
 3. As bids, offers, trades and/or actions happen on the exchange, Server sends Market Data - `Incremental Refresh <X>` messages
 
-*.*FIX 4.4 EP 26 is used to backport MDEntryType (269) = Q Action Clearing Price to denote indicative and final action prices.*
-
 
 ## Logon < A> message
 
