@@ -131,7 +131,7 @@ Tag|Name|Req|Description
 37 | OrderID | Y |Unique identifier of the order as assigned by the server. Possible "NONE" and `ExecType <150>` = 8 Rejected when order not found
 11 | ClOrdID | Y * (Required for existing order) | Current unique identifier of the order as assigned by the client. 
 41 | OrigClOrdID | N * (Required if client change ClOrdID in Order Cancel/Replace `Request <G>` message or `Order Cancel Request <F>` message) | Previous unique identifier of the order as assigned by the client if current ClOrdID it was changed
-17 | ExecID | Y | Unique identifier of execution message as assigned by server (0 (zero) for `ExecType <150>` = 8 Rejected)
+17 | ExecID | Y | Unique identifier of execution message as assigned by server.
 150 | ExecType | Y |Describes the purpose of the Execution Report <br>Possible values: <br>	I = Order Status<br>	6 = Pending Cancel<br>	E = Pending <br>Replace<br>	F = Trade<br>	8 = Rejected
 39 | OrdStatus | Y |Describes the current order status <br>Possible values:<br>   A = Pending New<br>   0 = New<br>   1 = Partially filled<br>   2 = Filled<br>   4 = Canceled<br>   8 = Rejected
 58 | Text | N |Error description if contains
