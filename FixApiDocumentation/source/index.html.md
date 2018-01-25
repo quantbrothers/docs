@@ -3,6 +3,7 @@ title: API Reference
 
 language_tabs: # must be one of https://git.io/vQNgJ
   - C#
+  - javascript
 
 toc_footers:
   - <a href='http://www.QuantBrothers.com'>QuantBrothers</a>
@@ -488,24 +489,25 @@ The `Reject <3>` message should be issued when a message is received but cannot 
 <br>99 Other
 <br><br>*(Note other session-level rule violations may exist in which case `SessionRejectReason <373>` of Other may be used and further information may be in `Text <58>` field.)*
 
-# Framework gateway RESTFul API
+# Public Endpoints Framework gateway RESTFul API 
 message which represents 
 
 ## General
-Requests parameters for POST requests (authenticated) in the "Authenticated Enpoints" section are part of the PAYLOAD, not GET parameters.
-Requests parameters for GET requests (non-authenticated) are appended as sub-path of request URL.
-For example:
-https://<client host:port>/v1/ticker/<symbol>/<exchange>
-URL depends on customer’s dedicated service.
-/v1 – protocol version
-/ticker – method name
-/<symbol> - name of exchange currency pair (ETH_BTC, BTC_USD …)
-/<exchange> - name of exchange (Bitfinex`, HitBTC …)
+Requests parameters for POST requests (authenticated) in the "Authenticated Enpoints" section are part of the PAYLOAD, not GET parameters.<br>
+Requests parameters for GET requests (non-authenticated) are appended as sub-path of request URL.<br>
+For example:<br>
+`https://<client host:port>/v1/ticker/<symbol>/<exchange>`<br>
+URL depends on customer’s dedicated service.<br>
+`/v1` – protocol version<br>
+`/ticker` – method name<br>
+`/<symbol>` - name of exchange currency pair (ETH_BTC, BTC_USD …)<br>
+`/<exchange>` - name of exchange (Bitfinex, HitBTC …)<br>
+<br><br>
+< symbol> or trading pair name implies that the base currency is written first then the settlement currency using underscore separator. It means when buy order of ETH_BTC executed, trader obtained ETH and paid by BTC. Or – when sell order of ETH_BTC executed, trader paid for ETH to obtain BTC.
+Quants framework provides access to multiple exchanges using single API interface. <br>
+<br>
+< exchange> could be the following:
 
-<symbol> or trading pair name implies that the base currency is written first then the settlement currency using underscore separator. It means when buy order of ETH_BTC executed, trader obtained ETH and paid by BTC. Or – when sell order of ETH_BTC executed, trader paid for ETH to obtain BTC.
-
-Quants framework provides access to multiple exchanges using single API interface. 
-<exchange> could be the following:
 Exchange|Public trades|Withdrawal API|Comments
 --------|-------------|--------------|--------
 Bitfinex|Y|Y|
@@ -517,15 +519,580 @@ Cryptopia|N|Y|Only single buy or sell order at time
 Poloniex|Y|Y|
 
 
+<!--## Public Endpoints:-->
+
+## Ticker
+
+**Request**
+`https://<client host:port>/v1/ticker/<symbol>/<exchange>`<br>
+Returns current ticker information for specified symbol and exchange. 
+
+**Response details **
+
+Key|Type|Description
+---|----|-----------
+bid|price|Innermost bid
+ask|price|Innermost ask
+last|price|The price at which the last order executed
+timestamp|time|The timestamp at which this information was valid
+
+## Orderbook
+
+Get the full order book
+
+**Request**
+`https://<client host:port>/v1/book/<symbol>/<exchange>`<br>
+Returns current full order book for specified symbol and exchange. 
+
+**Response details**
+
+Key|Type|Description
+---|----|-----------
+bids|array of { price, amount }|Prices and amounts of bids. First value with higher price
+asks|array of { price, amount }|Prices and amounts of asks. First value with smallest price
+timestamp|time|The timestamp at which this information was valid
 
 
+## Public Trades
+
+Get a list of the most recent trades for the given symbol.
+
+**Request**
+`https://<client host:port>/v1/public_trades/<symbol>/<exchange>`
+
+**Response details**
+
+Key|Type|Description
+---|----|-----------
+trade_id|string|Trade identifier of the trades exchange
+exchange|string|Traded exchange name
+symbol|string|Traded exchange pair name
+side|string|"sell" or "buy" (can be "" if undetermined)
+price|decimal|price of the trade
+amount|decimal|amount of the trade
+timestamp|time|Time when this trade issued
 
 
+## Symbols
+
+A list of symbol names and exchanges where this symbol is listed.
+
+**Request**
+`https://<client host:port>/v1/symbols/<exchange>`<br>
+Returns list of symbols for specified exchange.
+
+**Response details**
+
+Key|Type|Description
+---|----|-----------
+exchange|string|exchange
+pairs|array of string|List of the pairs code. This strings can be used as universal code in order API for any kind of exchange. 
+
+or<br>
+
+`https://<client host:port>/v1/symbols`<br>
+Returns all known symbols wherever they are listed.
+
+**Response details**
+
+array of
+
+Key|Type|Description
+---|----|-----------
+pair|string|The pair code. This string can be used as universal code in order API for any kind of exchange. 
+exchanges|array of string|List of exchanges where this symbol is listed
 
 
+## Symbol Details
+
+Get a list of valid symbol IDs and the pair details.
+
+**Request**
+`https://<client host:port>/v1/symbol/<symbol>`<br>
+
+**Response details**
+
+Key|Type|Description
+---|----|-----------
+pair|string|The pair code. This string can be used as universal code in order API for any kind of exchange.
+base_name|string|Name of base currency. (e.g. ETH for ETH_BTC pair)
+base_long_name|string|Long name of base currency (e.g. Ethereum for ETH_BTC pair)
+settlement_name|string|Name of settlement currency (e.g. BTC for ETH_BTC pair)
+settlement_long_name|String|Long name of settlement currency (e.g. Bitcoin for ETH_BTC pair)
+expiration|Time|Time of expiration, for derivatives.
+exchanges|array of string|List of exchanges where this symbol is listed
 
 
+# Authenticated Endpoints Framework gateway RESTFul API 
+
+<!--## Authenticated Endpoints-->
+
+>javascript example
+
+```javascript
+const request = require('request')
+const crypto = require('crypto')
+
+const apiKey = '<Your API key here>'
+const apiSecret = '<Your API secret here>'
+const baseUrl = 'https://<client host:port>'
+
+const url = '/v1/order/cancel'
+const completeURL = baseUrl + url
+
+const fingerprint = url + body  + apiKey
+
+const signature = crypto
+  .createHmac('sha512', apiSecret)
+  .update(fingerprint)
+  .digest('hex')
+
+const options = {
+  url: completeURL,
+  headers: {
+    'APIKEY': apiKey,
+    'SIGNATURE': signature
+  },
+  body: JSON.stringify(body)
+}
+
+return request.post(
+  options,
+  function(error, response, body) {
+    console.log('response:', JSON.stringify(body, 0, 2))
+  }
+)
+```
+
+Authentication is done using an API key and a secret. <br>
+As an example of how to authenticate, we can look at the "`/order/cancel`" endpoint.<br>
+The authentication procedure is as follows:<br>
+The fingerprint is the string constructed from URL endpoint, request JSON body and *API key* <br>
+<br>
+`fingerprint = (endpoint + body  + API key)`<br>
+i.e. :<br>
+`fingerprint = (/v1/order/cancel + {client_order_id="14bbaa94..."} + your_api_key)`<br>
+<br>
+The signature is the hex digest of an *HMAC-SHA512* hash where the message is your payload, and the secret key is your *API secret*.<br>
+`signature = HMAC-SHA512(fingerprint, api-secret).digest('hex')`<br>
+<br>
+These are encoded as HTTP headers named:<br>
+`APIKEY`<br>
+`SIGNATURE`<br>
+<br>
+<aside class="notice">
+Note: all Authenticated Endpoints use POST request
+</aside>
+
+<aside class="notice">
+ Accounts: For any specific exchange client can operate with multiple registered accounts. Quants framework using account identifier in order to choose which one to use for the given API call. All account identifier are pre-configured for web API installation. 
+</aside>
 
 
+## Wallet Balances
+
+See your balances
+
+**Request**
+`https://<client host:port>/v1/balances`
+
+**Request details**
 
 
+Key|Type|Required|Description
+---|----|--------|-----------
+account_id|string|N|Account identifier. If not specified, returns balances for all registered accounts.
+currencies|array of string|N|Currencies filter.
+
+**Response details**
+
+>json
+
+```json
+{
+	"account_id" : "",
+	"balances" :	[
+		{
+			"currency" : "",
+			"amount" : 0,
+			"blocked" : 0
+		}
+	]
+}
+```
+
+Array of
+
+Key|Type|Description
+---|----|-----------
+account_id|String|Account identifier of received balances report 	
+balances|array of balance |Array of balances per currency (below in table '*' marked)
+  *currency|string|Currency name
+  *amount|decimal|Amount available for trading
+  *blocked|decimal|Amount blocked by placed order, pending withdrawals or some specific tasks of exchange
+
+
+## New Order
+
+Submit a new Order
+
+**Request**
+`https://<client host:port>/v1/order/new`
+
+**Request details**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+client_order_id|string|Y|Unique order ID generated by client. From 6 to 64 characters.
+account_id|string|Y|Account identifier
+symbol|string|Y|Symbol of trading pair (e.g. ETH_BTC)
+side|string|Y|“buy” or “sell”
+amount|decimal|Y|Amount of currency you want to buy or sell
+price|decimal|Y|Order price|
+type|string|N|‘limit’ for limit order, or ‘IOC’ Immediate Or Cancel
+
+**Response details**
+
+Key|Type|Description
+---|----|-----------
+account_id|string|Account identifier of placed order 
+order_id|string |Global unique identifier of the created order generated by Quants system
+exchange_order_id|string|Order identified of the specific exchange. Not for using in the API. Can be used for debug purposes.
+timestamp|time|Order creation time
+
+
+## Move Order
+
+Change order attributes.
+
+<aside class="notice">
+Note: some of exchange does not provide functionality to change order. In this case Quants framework doing this work internally by canceling previous order and create new one. From API prospective it works same in all cases by sending one request /order/move.
+</aside>
+
+**Request**
+`https://<client host:port>/v1/order/move`
+
+**Request details**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+client_order_id|string|Y|Order ID generated by client, the same as in moving order
+price|decimal|Y|New price
+amount|decimal|Y|New amount
+
+**Response details**
+
+Key|Type|Description
+---|----|-----------
+exchange_order_id|string|Order identified of the specific exchange. Some exchanges change this identifier after order move. This field can be used for debug purposes.
+timestamp|time|Order modification time
+
+<aside class="notice">
+Note: order move operation does not change order identifier. Only ‘exchange_order_id’ can be changed
+</aside>
+
+
+## Cancel Order
+
+Cancel an order
+
+**Request**
+`https://<client host:port>/v1/order/cancel`
+
+**Request details**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+client_order_id|string|Y|Order ID generated by client, the same as in cancelling order
+
+**Response details**
+Response is empty or error with description
+
+
+## Order Status
+
+Get the status of an order. Is it active? Was it cancelled? To what extent has it been executed? etc.
+
+**Request**
+`https://<client host:port>/v1/order/status`
+
+**Request details**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+client_order_id|string|Y|Order ID generated by client
+
+**Response details**
+
+Key|Type|Description
+---|----|-----------
+order_id|string |Global unique identifier of the created order generated by Quants system
+exchange_order_id|string|Order identified of the specific exchange
+symbol|string|Symbol of trading pair (e.g. ETH_BTC)
+side|string|“buy” or “sell”
+state|string|“active” if order still alive<br>“filled” when order fully executed<br>“canceled” when order was canceled<br>“error” if order was failed during /order/new or /order/move request
+amount|decimal|Amount was the order originally submitted of last modified
+executed_amount|decimal|How much of the order has been executed so far in its history
+remaining_amount|decimal|How much is still remaining to be submitted
+price|double|The price the order was issued
+timestamp_submitted|time|Time when order was submitted on exchange
+timestamp_last_modified|time|Order last modification time
+
+
+## Active Orders
+
+Response all active orders.
+
+**Request**
+`https://<client host:port>/v1/order/orders`
+
+**Request details**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+account_id|string|N|Account identifier. If not specified all active orders from all accounts will send in response.
+
+**Response details**
+Array of
+
+Key|Type|Description
+---|----|-----------
+account_id|string|Order account identifier
+client_order_id|string|Order ID generated by client
+order_id|string|Global unique identifier of the created order generated by Quants system
+exchange_order_id|string|Order identified of the specific exchange
+symbol|string|Symbol of trading pair (e.g. ETH_BTC)
+side|string|“buy” or “sell”
+amount|decimal|Amount was the order originally submitted of last modified
+executed_amount|decimal|How much of the order has been executed so far in its history
+remaining_amount|decimal|How much is still remaining to be submitted
+price|decimal|The price the order was issued
+timestamp_submitted|time|Time when order was submitted on exchange
+timestamp_last_modified|time|Order last modification time
+
+
+## Trades
+
+Get list of own trades
+
+**Request**
+`https://<client host:port>/v1/order/trades`
+
+**Request details**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+account_id|string|N|Account identifier. If not specified all trades from all accounts will send in response.
+timestamp_from|time|N|Begin of time range (default value is current time minus 2 days)
+timestamp_to|time|N|End of time range (default value is maximum time value)
+
+**Response**
+
+Key|Type|Description
+---|----|-----------
+account_id|string|Identifier of the account where trade issued
+trade_id|string|Trade identifier
+exchange_trade_id|string|Trade identified of the specific exchange
+client_order_id|string|Order ID generated by client
+order_id|string|Global unique identifier of the created order generated by Quants system
+symbol|string|Symbol of trading pair (e.g. ETH_BTC)
+side|string|“buy” or “sell”
+amount|decimal|Amount was the order originally submitted of last modified
+executed_amount|decimal|Amount of the trade
+executed_price|decimal|Price of the executed amount
+fee|decimal|Fee charged by exchange. In absolute volume nominated by fee currency.
+fee_currency|string|Currency of the fee amount
+timestamp|time|Time of the trade
+
+<aside class="notice">
+Note: response is limited by 50000 trades. When number of trades in specified range exceed this number error returned. You can reduce time range to avoid error.
+</aside>
+
+
+# Web Socket market data Framework gateway RESTFul API 
+
+<!--# Web Socket market data-->
+
+Web socket channels provides real-time data for order book changes, executed trades, balance changes etc...<br>
+Market data service are available by dedicated URL for the customer.<br>
+`ws://<client host:ws port>/v1/marketdata`
+
+## Login
+First message sent to the Web Socket server should be *login*. Login message includes all required info for client authentication. When login occurs client automatically received orders and trades snapshot and then any order and trade updates. 
+
+**Request details**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+evt|string|Y|Event name. Should be “login”
+api_key|string|Y|API key
+auth_sig|string|Y|HMAC SHA512 signature of the fingerprint constructed as:<br>“AUTH” + auth_nonce + API key
+auth_nonce|int|Y|Any unique non repeating number between logins.  (i.e. ticks of CPU timer)
+
+>JavaScript example of the ‘auth_sig’ calculation:
+
+```javascript
+const request = require('request')
+const crypto = require('crypto')
+
+const apiKey = '<Your API key here>'
+const apiSecret = '<Your API secret here>'
+const baseUrl = 'https://<client host:ws port>'
+
+const authNonce = Date.now().toString()
+const fingerprint = ‘AUTH’ + authNonce + apiKey
+
+const  authSig = crypto
+  .createHmac('sha512', apiSecret)
+  .update(fingerprint)
+  .digest('hex')
+```
+
+**Response**
+
+Key|Type|Description
+---|----|-----------
+evt|string|“logon”
+auth_nonce|int|Nonce specified in login request
+
+## Orders and Trades Snapshot
+Snapshot of the active orders and trades issued last 2 days will send to client automatically after successfully logon.
+
+**Response**
+
+Key|Type|Description
+---|----|-----------
+evt|string|“snapshot”
+orders|array|Array of active orders (below in table '*' marked)
+*account_id|string|Order account identifier 
+*client_order_id|string|Order ID generated by client
+*order_id|string|Global unique identifier of the created order generated by Quants system
+*exchange_order_id|string|Order identified of the specific exchange
+*symbol|string|Symbol of trading pair (e.g. ETH_BTC)
+*side|string|"buy" or "sell"
+*state|string|"active" if order still alive<br>"filled" when order fully executed<br>"canceled" when order was canceled<br>"error" if order was failed during /order/new or /order/move request
+*amount|decimal|Amount was the order originally submitted of last modified
+*executed_amount|decimal|How much of the order has been executed so far in its history
+*remaining_amount|decimal|How much is still remaining to be submitted
+*price|price|The price the order was issued
+*timestamp_submitted|rime|Time when order was submitted on exchange
+*timestamp_last_modified|rime|Order last modification time
+trades|array|Array of trades issued last 2 days (below in table '*' marked)
+*account_id|string|Identifier of the account where trade issued
+*trade_id|string |Trade identifier
+*exchange_trade_id|string|Trade identified of the specific exchange
+*client_order_id|string|Order ID generated by client
+*order_id|string|Global unique order identifier 
+*symbol|string|Symbol of trading pair (e.g. ETH_BTC)
+*side|string|"buy" or "sell"
+*Amount|decimal|Amount was the order originally submitted of last modified
+*executed_amount|decimal|Amount of the trade
+*executed_price|price|Price of the executed amount
+*fee|decimal|Fee charged by exchange. In absolute volume nominated by fee currency.
+*fee_currency|string|Currency of the fee amount
+*timestamp|time|Time of the trade
+
+
+## Channel subscription and unsubscription
+To subscribe to any data provided by Web Socket service client should subscribe to specific channel – 'book', 'balances' …<br>
+Let’s looks to request and responses examples for orderbook channel - 'book'<br>
+
+**Subscription request**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+evt|string|Y|"subscribe"
+channel|string|Y|"book"
+exchanges|array|Y|Array of Exchange name to subscribe
+symbols|array|Y|Array of symbol names for currency pairs to subscribe
+
+**Subscription response**
+
+Key|Type|Description
+---|----|-----------
+evt|string|"subscribed"
+channel|string|"book"
+channel_id|string|Identifier of the channel
+
+**Channel online event**
+
+Key|Type|Description
+---|----|-----------
+evt|string|"online"
+channel|string|"book"
+channel_id|string|Identifier of the channel
+
+'online' event sends to the clients after Web Socket server sent 'book' events with current orderbook snapshot state.
+
+**Unsubscription request**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+evt|string|Y|"unsubscribe"
+channel_id|string|Y|Identifier of the channel to unsubscribe
+
+**Unsubscription response**
+
+Key|Type|Description
+---|----|-----------
+evt|string|“unsubscribed”
+channel_id|string|Identifier of the channel
+
+
+## Book event
+
+Order book full update. Event name 'book'
+
+Key|Type|Description
+---|----|-----------
+evt|string|“book”
+channel_id|string|Channel identifier
+exchange |string|Exchange name
+data|array|Array of order books (below in table '*' marked)
+*symbol|string|Symbol of trading pair (e.g. ETH_BTC)
+*bids|array of { price, amount }|Prices and amounts of bids. First value with higher price 	
+*asks|array of { price, amount }|Prices and amounts of asks. First value with smallest price
+*timestamp|time|The timestamp of latest order book change
+
+<aside class="notice">
+Note: 'book' request provides full order books data on every update instead of delta change.
+</aside>
+
+
+## Balances event
+
+Subscribe to changes of account balances. Event name 'balances'<br>
+Balances channel requires 'account_id' in subscription request
+
+**Subscription request**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+evt|string|Y|“subscribe”
+channel|string|Y|“balances”
+account_id|string|Y|Account identifier
+
+Unsubscription request same as other events
+
+**Event**
+
+Key|Type|Description
+---|----|-----------
+Key|Type|Description
+evt|string|“balances”
+channel_id|string|Channel identifier
+account_id|string|Account identifier
+balances|array|Array of balances (below in table '*' marked)
+*currency|string|Currency name
+*amount|decimal|Amount available for trading
+*blocked|decimal|Amount blocked by placed order, pending withdrawals or some specific tasks of exchange
+
+
+## Error handling
+ Any kind of request – POST or GET completed by successful HTTP response with code 200 or error HTTP response. Error will include JSON body with error description:
+
+Key|Type|Description
+---|----|-----------
+error_code|int|Numerical code of the error
+error_name|string|Name of numerical error code
+description|string|Error description
