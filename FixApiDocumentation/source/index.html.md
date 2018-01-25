@@ -487,3 +487,45 @@ The `Reject <3>` message should be issued when a message is received but cannot 
 <br>17 Non "data" value includes field delimiter (SOH character)
 <br>99 Other
 <br><br>*(Note other session-level rule violations may exist in which case `SessionRejectReason <373>` of Other may be used and further information may be in `Text <58>` field.)*
+
+# Framework gateway RESTFul API
+message which represents 
+
+## General
+Requests parameters for POST requests (authenticated) in the "Authenticated Enpoints" section are part of the PAYLOAD, not GET parameters.
+Requests parameters for GET requests (non-authenticated) are appended as sub-path of request URL.
+For example:
+https://<client host:port>/v1/ticker/<symbol>/<exchange>
+URL depends on customer’s dedicated service.
+/v1 – protocol version
+/ticker – method name
+/<symbol> - name of exchange currency pair (ETH_BTC, BTC_USD …)
+/<exchange> - name of exchange (Bitfinex`, HitBTC …)
+
+<symbol> or trading pair name implies that the base currency is written first then the settlement currency using underscore separator. It means when buy order of ETH_BTC executed, trader obtained ETH and paid by BTC. Or – when sell order of ETH_BTC executed, trader paid for ETH to obtain BTC.
+
+Quants framework provides access to multiple exchanges using single API interface. 
+<exchange> could be the following:
+Exchange|Public trades|Withdrawal API|Comments
+--------|-------------|--------------|--------
+Bitfinex|Y|Y|
+Kraken|Y|Y|
+Bittrex|Y|Y|
+HitBTC|Y|Y|
+Liqui|Y|N|
+Cryptopia|N|Y|Only single buy or sell order at time
+Poloniex|Y|Y|
+
+
+
+
+
+
+
+
+
+
+
+
+
+
