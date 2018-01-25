@@ -12,10 +12,10 @@ toc_footers:
 
 includes:
 
-search: true
+search: false
 ---
 
-# Framework gateway FIX API
+# FIX API
 message which represents 
 
 
@@ -64,6 +64,7 @@ The `Logout <5>` message initiates or confirms the termination of a FIX session.
 To submit a new order to server, send a `New Order Single <D>` message. Server will respond to a `New Order Single <D>` message with an `Execution Report <8>`.
 
 >For lib Quickfix
+>C#
 
 ```csharp
  NewOrderSingle newOrderSingle = new NewOrderSingle(
@@ -154,6 +155,7 @@ Tag|Name|Req|Description
 The order cancel/replace request is used to change the parameters of an existing order. Do not use this message to cancel the remaining quantity of an outstanding order, use the `Order Cancel Request <F>` message for this purpose.
 
 >For lib Quickfix
+>C#
 
 ```csharp
 OrderCancelReplaceRequest orderCancelReplaceRequest = new OrderCancelReplaceRequest(
@@ -212,6 +214,7 @@ Tag|Name|Req|Description
 The `Order Cancel Request <F>` message requests the cancellation of all of the remaining quantity of an existing order.
 
 >For lib Quickfix
+>C#
 
 ```csharp
 OrderCancelRequest orderCancelRequest = new OrderCancelRequest(
@@ -260,6 +263,7 @@ Tag|Name|Req|Description
 The `Order Status Request <H>` message is used by the client to generate an order status message (`Execution Report <8>` message) back from the server.
 
 >For lib Quickfix
+>C#
 
 ```csharp
 OrderStatusRequest orderStatusRequest = new OrderStatusRequest(
@@ -285,6 +289,7 @@ Response on `Order Status Request <H>` is an `Execution Report <8>` message with
 The `Order Mass Status Request <AF>` message requests the status for orders matching criteria specified within the request.
 
 >For lib Quickfix
+>C#
 
 ```csharp
 OrderMassStatusRequest orderMassStatusRequest = new OrderMassStatusRequest(
@@ -316,6 +321,7 @@ Responses on `Order Mass Status Request <AF>` message is an `Execution Reports <
 The `Security List Request <x>` message is used to return a list of securities from the server that match criteria provided on the request.
 
 >For lib Quickfix
+>C#
 
 ```csharp
 SecurityListRequest securityListRequest = new SecurityListRequest(
@@ -365,6 +371,7 @@ Tag|Name|Req|Description
 Subscribes the current session to a Market Data - `Snapshot/Full Refresh <W>` followed by zero or more Market Data - `Incremental Refresh <X>` messages.
 
 >For lib Quickfix
+>C#
 
 ```csharp
 MarketDataRequest marketDataRequest = new MarketDataRequest(
@@ -489,7 +496,7 @@ The `Reject <3>` message should be issued when a message is received but cannot 
 <br>99 Other
 <br><br>*(Note other session-level rule violations may exist in which case `SessionRejectReason <373>` of Other may be used and further information may be in `Text <58>` field.)*
 
-# Public Endpoints Framework gateway RESTFul API 
+# RESTFul API Public Endpoints
 message which represents 
 
 ## General
@@ -623,7 +630,7 @@ expiration|Time|Time of expiration, for derivatives.
 exchanges|array of string|List of exchanges where this symbol is listed
 
 
-# Authenticated Endpoints Framework gateway RESTFul API 
+# RESTFul API Authenticated Endpoints
 
 <!--## Authenticated Endpoints-->
 
@@ -909,7 +916,7 @@ Note: response is limited by 50000 trades. When number of trades in specified ra
 </aside>
 
 
-# Web Socket market data Framework gateway RESTFul API 
+# RESTFul API Web Socket market data
 
 <!--# Web Socket market data-->
 
