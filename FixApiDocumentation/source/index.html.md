@@ -7,7 +7,7 @@ language_tabs: # must be one of https://git.io/vQNgJ
 
 toc_footers:
   - <a href='http://www.QuantBrothers.com'>QuantBrothers</a>
-  - <a href='https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample'>Example</a>
+  - <a href='https://github.com/quantbrothers/docs/tree/master/QuickFIXExchangeExample'>Fix Example</a>
   
 
 includes:
@@ -22,6 +22,21 @@ message which represents
 ## Workflow
 
 After connecting and logging on, the client can either request a security list or subscribe to market data.
+
+
+## Custom fields
+
+Tag|Name|Type
+---|----|----
+20101|QReqID|String
+20102|Amount|Qty
+20103|Address|String
+20104|PaymentID|String
+20105|TransactionCompleted|Boolean
+20106|TransactionID|String
+20107|VenueTransactionID|String
+20108|TransactionFee|Qty
+20109|TransactionsListType|Int
 
 
 **Security list**
@@ -58,6 +73,8 @@ Tag|Name|Req|Description
 
 The `Logout <5>` message initiates or confirms the termination of a FIX session. Disconnection without the exchange of `Logout <5>` messages should be interpreted as an abnormal condition.
 
+**Workflow**
+After connecting, logging on, and synchronizing sequence numbers, the client can submit orders. All identifiers must be unique like GUID or UUID.
 
 ## New Order Single < D> message
 
@@ -87,7 +104,7 @@ testFixApp.Send(newOrderSingle);
 
 Tag|Name|Req|Description
 ---|----|---|-----------
-11 | ClOrdID | Y | Unique identifier of the order as assigned by the client. Uniqueness must be guaranteed by the client for the duration of the lifetime the order.
+11 | ClOrdID | Y | Unique identifier of the order as assigned by the client. Must be unique like GUID or UUID.
 1 | Account | N | Market account id
 660 | AcctIDSource | Y * (required if use `Account <1>`) | Type of account. Should be 99 = Other (custom or proprietary) This field is required if 1 = Account contains account identifier.
 40 | OrdType| Y | Order type. Valid values:   1 = Market   2 = Limit
@@ -137,7 +154,7 @@ Tag|Name|Req|Description
 150 | ExecType | Y |Describes the purpose of the Execution Report <br>Possible values: <br>	I = Order Status<br>	6 = Pending Cancel<br>	E = Pending <br>Replace<br>	F = Trade<br>	8 = Rejected
 39 | OrdStatus | Y |Describes the current order status <br>Possible values:<br>   A = Pending New<br>   0 = New<br>   1 = Partially filled<br>   2 = Filled<br>   4 = Canceled<br>   8 = Rejected
 58 | Text | N |Error description if contains
-54 | Side | Y | Side of the order.<br>Possible values:<br>   1 = Buy<br>   2 = Sell<br>   B = "As Defined" (when `ExecType <150>` = 8 Rejected and order not found)
+54 | Side | Y | Side of the order.<br>Possible values:<br>   1 = Buy<br>   2 = Sell<br>   B = "As Defined" (when `ExecType <150>` = 8 Rejected and/or order not found)
 55 | Symbol | Y | Ticker symbol. | Possible "-" when `ExecType <150>` = 8 Rejected and order not found
 14 | CumQty | Y | Total quantity of the  order that is filled. Zero (0) when `ExecType <150>` = 8 Rejected and order not found
 151 | LeavesQty | Y | Quantity open for further execution. Zero (0) when `ExecType <150>` = 8 Rejected and order not found
@@ -176,7 +193,7 @@ testFixApp.Send(orderCancelReplaceRequest);
 
 Tag|Name|Req|Description
 ---|----|---|-----------
-11 | ClOrdID | Y | New unique identifier of the existing order as assigned by the client. Uniqueness must be guaranteed by the client for the duration of the lifetime the order. (new if needed, otherwise it can be equal OrigClOrdID)
+11 | ClOrdID | Y | New unique identifier of the existing order as assigned by the client. (new if needed, otherwise it can be equal OrigClOrdID)
 41 | OrigClOrdID | Y | Current unique identifier of the order as assigned by the client. 
 40 | OrdType | Y | Order type. Valid values:<br>   2 = Limit <br>Must be equal of an existing order
 44 | Price | Y | Price per unit of quantity <br>New value of Price and/or OrderQty
@@ -232,7 +249,7 @@ testFixApp.Send(orderCancelRequest);
 
 Tag|Name|Req|Description
 ---|----|---|-----------
-11 | ClOrdID | Y | New unique identifier of the existing order as assigned by the client. Uniqueness must be guaranteed by the client for the duration of the lifetime the order. (new if needed, otherwise it can be equal OrigClOrdID)
+11 | ClOrdID | Y | New unique identifier of the existing order as assigned by the client. (new if needed, otherwise it can be equal OrigClOrdID)
 41 | OrigClOrdID | Y | Current unique identifier of the order as assigned by the client. 
 38 | OrderQty | Y | Quantity ordered. Needed > 0, but there is nothing to do. Will be try cancellation of all of the remaining quantity.
 54 | Side | Y | Side of the order.<br>Valid values:<br>   1 = Buy<br>   2 = Sell <br>Must be equal of an existing order
@@ -278,7 +295,7 @@ testFixApp.Send(orderStatusRequest);
 
 Tag|Name|Req|Description
 ---|----|---|-----------
-11 | ClOrdID | Y | New unique identifier of the existing order as assigned by the client. Uniqueness must be guaranteed by the client for the duration of the lifetime the order. (new if needed, otherwise it can be equal OrigClOrdID)
+11 | ClOrdID | Y | New unique identifier of the existing order as assigned by the client. (new if needed, otherwise it can be equal OrigClOrdID)
 790 | OrdStatusReqID | N | Can be used to uniquely identify a specific `Order Status Request <H>` and response message.
 
 Response on `Order Status Request <H>` is an `Execution Report <8>` message with current order status. `ExecType <150>` in a response may have two values: 8 = Rejected (if order not found) and I = Order Status. `Execution Report <8>` response contain `OrdStatusReqID <790>` if request contain it.
@@ -460,6 +477,118 @@ Tag|Name|Req|Description
 =>207 | SecurityExchange | Y * (required if `NoMDEntries <268>` > 0) | Market name.
 
 
+## Balances Request < bQ> message (custom message)
+
+Subscribes the current session to a Balance Data.
+
+Tag|Name|Req|Description
+---|----|---|-----------
+20101|QReqID|Y|Unique identifier for `Balances Request <bQ>`
+263|SubscriptionRequestType|Y|Subscription Request Type<br><br>Valid values:<br>0 = Snapshot<br>1 = Snapshot + Updates (Subscribe)<br>2 = Disable previous Snapshot + Update Request (Unsubscribe)
+1|Account|N|Account identifier. If not specified all active balances from all accounts will send.
+15|Currency|N|Currency name. If not specified all active balances from currencies will send.Can contain multiple currencies separated by a comma, like “BTC,USD,EUR”
+
+
+## Balances Refresh < bU> message (custom message)
+
+The Balances Refresh messages are used as the response to a `Balances Request <bQ>` message.
+
+Tag|Name|Req|Description
+---|----|---|-----------
+20101|QReqID|Y|Unique identifier of `Balances Request <bQ>`
+20102|Amount|Y|Amount of currency on exchange.
+1|Account|Y|Account identifier.
+15|Currency|Y|Currency name.
+
+
+## Balances Reject < bF> message (custom message)
+
+If a subscription error occurs, server will return `Balances Reject <bF>`
+
+Tag|Name|Req|Description
+---|----|---|-----------
+20101|QReqID|Y|Unique identifier of `Balances Request <bQ>`
+58|Text|N|Message to explain reason for rejection.
+
+
+## Deposit Address Request < wQ> message (custom message)
+
+Tag|Name|Req|Description
+---|----|---|-----------
+20101|QReqID|Y|Unique identifier for `Deposit Address Request <wQ>`
+1|Account|Y|Account identifier.
+15|Currency|Y|Currency name.
+
+
+## Deposit Address < wA> message (custom message)
+The Deposit Address messages are used as the response to a `Deposit Address Request <wQ>` message.
+
+Tag|Name|Req|Description
+---|----|---|-----------
+20101|QReqID|Y|Unique identifier for `Deposit Address Request <wQ>`
+20103|Address|Y|Address of cryptocurrency wallet.
+20104|PaymentID|N|Payment identifier if applicable for cryptocurrency.
+
+
+## Withdraw Request < wW> message (custom message)
+
+Tag|Name|Req|Description
+---|----|---|-----------
+20101|QReqID|Y|Unique identifier of `Withdraw Request <wW>`
+20102|Amount|Y|Amount of currency to withdraw.
+1|Account|Y|Account identifier.
+15|Currency|Y|Currency name. 
+20103|Address|Y|Address of cryptocurrency wallet.
+20104|PaymentID|N|Payment identifier if applicable for cryptocurrency.
+
+
+## Withdraw Ack < wR> message (custom message)
+
+Tag|Name|Req|Description
+---|----|---|-----------
+20101|QReqID|Y|Unique identifier of `Withdraw Request <wW>`
+
+
+## Transactions List Request < wLD> message (custom message)
+
+Tag|Name|Req|Description
+---|----|---|-----------
+20101|QReqID|Y|Unique identifier for `Transactions List Request <wLD>`
+1|Account|Y|Account identifier.
+15|Currency|Y|Currency name.
+20109|TransactionsListType|Y|Type of transactions list.<br><br>Valid values:<br>1 = Withdraw<br>2 = Deposit
+916|StartDate|N|Begin date and time of transaction in the list.<br><br>Format:<br>01/26/2018 14:27:45
+917|EndDate|N|End date and time of transaction in the list.<br><br>Format:<br>01/26/2018 14:27:45
+
+
+## Transactions List < wld> message (custom message)
+
+Tag|Name|Req|Description
+---|----|---|-----------
+20101|QReqID|Y|Unique identifier for `Transactions List Request <wLD>`
+20109|TransactionsListType|Y|Type of transactions list.<br><br>Valid values:<br>1 = Withdraw<br>2 = Deposit
+893|LastFragment|Y|Indicates if this message in a fragmented response
+20103|Address|Y|Address of cryptocurrency wallet.
+20104|PaymentID|N|Payment identifier if applicable for cryptocurrency.
+20102|Amount|Y|Amount of currency.
+20105|TransactionCompleted|Y|Does transaction completed or not.
+20106|TransactionID|Y|Transaction identifier in the blockchain.
+20107|VenueTransactionID|N|Internal identifier of the transaction provided by exchange.
+20108|TransactionFee|N|Fee of transaction in native blockchain currency.
+504|PaymentDate|Y|Date when transaction issued.
+58|Text|N|Transaction description, if provided by exchange.
+
+
+## Withdraw Reject < wF> message (custom message)
+
+Possible reject message for `Deposit Address Request <wQ>`, `Withdraw Request <wW>` and `Transactions List Request <wLD>`.
+
+Tag|Name|Req|Description
+---|----|---|-----------
+20101|QReqID|Y|Unique identifier of rejected request.
+58|Text|N|Where possible, message to explain reason for rejection.
+
+
 ## Reject < 3> message
 
 **Description**
@@ -497,6 +626,7 @@ The `Reject <3>` message should be issued when a message is received but cannot 
 <br><br>*(Note other session-level rule violations may exist in which case `SessionRejectReason <373>` of Other may be used and further information may be in `Text <58>` field.)*
 
 # RESTFul API Public Endpoints
+
 message which represents 
 
 ## General
@@ -525,6 +655,9 @@ Liqui|Y|N|
 Cryptopia|N|Y|Only single buy or sell order at time
 Poloniex|Y|Y|
 
+<aside class="notice">
+Timestamp- Unix Timestamp converted to long value.
+</aside>
 
 <!--## Public Endpoints:-->
 
@@ -541,7 +674,7 @@ Key|Type|Description
 bid|price|Innermost bid
 ask|price|Innermost ask
 last|price|The price at which the last order executed
-timestamp|time|The timestamp at which this information was valid
+timestamp|long|The timestamp at which this information was valid
 
 ## Orderbook
 
@@ -557,7 +690,7 @@ Key|Type|Description
 ---|----|-----------
 bids|array of { price, amount }|Prices and amounts of bids. First value with higher price
 asks|array of { price, amount }|Prices and amounts of asks. First value with smallest price
-timestamp|time|The timestamp at which this information was valid
+timestamp|long|The timestamp at which this information was valid
 
 
 ## Public Trades
@@ -577,7 +710,7 @@ symbol|string|Traded exchange pair name
 side|string|"sell" or "buy" (can be "" if undetermined)
 price|decimal|price of the trade
 amount|decimal|amount of the trade
-timestamp|time|Time when this trade issued
+timestamp|long|Time when this trade issued
 
 
 ## Symbols
@@ -626,7 +759,7 @@ base_name|string|Name of base currency. (e.g. ETH for ETH_BTC pair)
 base_long_name|string|Long name of base currency (e.g. Ethereum for ETH_BTC pair)
 settlement_name|string|Name of settlement currency (e.g. BTC for ETH_BTC pair)
 settlement_long_name|String|Long name of settlement currency (e.g. Bitcoin for ETH_BTC pair)
-expiration|Time|Time of expiration, for derivatives.
+expiration|long|Time of expiration, for derivatives.
 exchanges|array of string|List of exchanges where this symbol is listed
 
 
@@ -765,7 +898,7 @@ Key|Type|Description
 account_id|string|Account identifier of placed order 
 order_id|string |Global unique identifier of the created order generated by Quants system
 exchange_order_id|string|Order identified of the specific exchange. Not for using in the API. Can be used for debug purposes.
-timestamp|time|Order creation time
+timestamp|long|Order creation time
 
 
 ## Move Order
@@ -792,7 +925,7 @@ amount|decimal|Y|New amount
 Key|Type|Description
 ---|----|-----------
 exchange_order_id|string|Order identified of the specific exchange. Some exchanges change this identifier after order move. This field can be used for debug purposes.
-timestamp|time|Order modification time
+timestamp|long|Order modification time
 
 <aside class="notice">
 Note: order move operation does not change order identifier. Only ‘exchange_order_id’ can be changed
@@ -842,8 +975,8 @@ amount|decimal|Amount was the order originally submitted of last modified
 executed_amount|decimal|How much of the order has been executed so far in its history
 remaining_amount|decimal|How much is still remaining to be submitted
 price|double|The price the order was issued
-timestamp_submitted|time|Time when order was submitted on exchange
-timestamp_last_modified|time|Order last modification time
+timestamp_submitted|long|Time when order was submitted on exchange
+timestamp_last_modified|long|Order last modification time
 
 
 ## Active Orders
@@ -874,8 +1007,8 @@ amount|decimal|Amount was the order originally submitted of last modified
 executed_amount|decimal|How much of the order has been executed so far in its history
 remaining_amount|decimal|How much is still remaining to be submitted
 price|decimal|The price the order was issued
-timestamp_submitted|time|Time when order was submitted on exchange
-timestamp_last_modified|time|Order last modification time
+timestamp_submitted|long|Time when order was submitted on exchange
+timestamp_last_modified|long|Order last modification time
 
 
 ## Trades
@@ -890,8 +1023,8 @@ Get list of own trades
 Key|Type|Required|Description
 ---|----|--------|-----------
 account_id|string|N|Account identifier. If not specified all trades from all accounts will send in response.
-timestamp_from|time|N|Begin of time range (default value is current time minus 2 days)
-timestamp_to|time|N|End of time range (default value is maximum time value)
+timestamp_from|long|N|Begin of time range (default value is current time minus 2 days)
+timestamp_to|long|N|End of time range (default value is maximum time value)
 
 **Response**
 
@@ -909,7 +1042,7 @@ executed_amount|decimal|Amount of the trade
 executed_price|decimal|Price of the executed amount
 fee|decimal|Fee charged by exchange. In absolute volume nominated by fee currency.
 fee_currency|string|Currency of the fee amount
-timestamp|time|Time of the trade
+timestamp|long|Time of the trade
 
 <aside class="notice">
 Note: response is limited by 50000 trades. When number of trades in specified range exceed this number error returned. You can reduce time range to avoid error.
@@ -997,7 +1130,7 @@ trades|array|Array of trades issued last 2 days (below in table '*' marked)
 *executed_price|price|Price of the executed amount
 *fee|decimal|Fee charged by exchange. In absolute volume nominated by fee currency.
 *fee_currency|string|Currency of the fee amount
-*timestamp|time|Time of the trade
+*timestamp|long|Time of the trade
 
 
 ## Channel subscription and unsubscription
@@ -1059,7 +1192,7 @@ data|array|Array of order books (below in table '*' marked)
 *symbol|string|Symbol of trading pair (e.g. ETH_BTC)
 *bids|array of { price, amount }|Prices and amounts of bids. First value with higher price 	
 *asks|array of { price, amount }|Prices and amounts of asks. First value with smallest price
-*timestamp|time|The timestamp of latest order book change
+*timestamp|long|The timestamp of latest order book change
 
 <aside class="notice">
 Note: 'book' request provides full order books data on every update instead of delta change.
