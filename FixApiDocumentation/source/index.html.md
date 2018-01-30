@@ -1049,6 +1049,108 @@ Note: response is limited by 50000 trades. When number of trades in specified ra
 </aside>
 
 
+## Get deposit address
+
+**Request**
+`https://<client host:port>/v1/get_deposit_address`
+
+**Request details**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+account_id|string|Y|Account identifier.
+currency|string|Y|Currency of the deposit.
+
+**Response**
+
+Key|Type|Description
+---|----|-----------
+address|string|Deposit address.
+payment_id|string|Used to identify transactions to merchants and exchanges.
+
+
+## Withdraw
+
+**Rrequest**
+`https://<client host:port>/v1/withdraw`
+
+**Request details**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+account_id|string|Y|Account identifier.
+currency|string|Y|Currency of the deposit.
+amount|decimal|Y| 
+destination_address|string|Y| 
+
+**Responce**
+
+Key|Type|Description
+---|----|-----------
+account_id|string| 
+success|boolean| 
+
+
+## Get withdraw transactions
+
+**Rrequest**
+`https://<client host:port>/v1/get_withdraw_transactions`
+
+**Request details**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+account_id|string|Y|Account identifier.
+timestamp_from|long|Y|Time 
+timestamp_to|long|Y| 
+
+**Response**
+
+Key|Type|Description
+---|----|-----------
+account_id|string| 
+withdraw_transactions|array of transactions| (below in table '*' marked)
+*market_transaction_id|string| 
+*address|string| 
+*transaction_id|string| 
+*payment_id|string| 
+*amount|decimal| 
+*transaction_completed|boolean| 
+*payment_date_time|long| 
+*transaction_fee|decimal| 
+*description|string| 
+
+
+## Get deposit transactions
+
+**Rrequest**
+`https://<client host:port>/v1/get_deposit_transactions`
+
+**Request details**
+
+Key|Type|Required|Description
+---|----|--------|-----------
+account_id|string|Y|Account identifier.
+timestamp_from|long|Y|Time 
+timestamp_to|long|Y| 
+
+**Response**
+
+Key|Type|Description
+---|----|-----------
+account_id|string| 
+deposit_transactions|array of transactions|(below in table '*' marked)
+*market_transaction_id|string| 
+*address|string| 
+*transaction_id|string| 
+*payment_id|string| 
+*amount|decimal| 
+*transaction_completed|boolean| 
+*payment_date_time|long| 
+*transaction_fee|decimal| 
+*description|string| 
+
+
 # RESTFul API Web Socket market data
 
 <!--# Web Socket market data-->
@@ -1226,6 +1328,8 @@ balances|array|Array of balances (below in table '*' marked)
 *currency|string|Currency name
 *amount|decimal|Amount available for trading
 *blocked|decimal|Amount blocked by placed order, pending withdrawals or some specific tasks of exchange
+
+
 
 
 ## Error handling
