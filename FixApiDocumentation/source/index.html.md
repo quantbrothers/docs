@@ -666,6 +666,18 @@ Timestamp- Unix Timestamp converted to long value.
 `https://<client host:port>/v1/ticker/<symbol>/<exchange>`<br>
 Returns current ticker information for specified symbol and exchange. 
 
+>JSON<br>*http://127.0.0.1:8082/v1/ticker/BTC_USDT/VirtualMarket*
+
+```json
+{
+  "symbol": "BTC_USDT",
+  "bid": 14284.0,
+  "ask": 14286.0,
+  "last": "NaN",
+  "timestamp": 1519893112006906
+}
+```
+
 **Response details **
 
 Key|Type|Description
@@ -679,6 +691,39 @@ timestamp|long|The timestamp at which this information was valid
 ## Orderbook
 
 Get the full order book
+
+>JSON<br> *http://127.0.0.1:8082/v1/book/BTC_USDT/VirtualMarket*
+
+```json
+{
+  "symbol": "BTC_USDT",
+  "bids": [
+    {
+      "price": 14284.0,
+      "amount": 0.70000000000000007
+    },
+	....
+    ,
+    {
+      "price": 14242.0,
+      "amount": 0.70000000000000007
+    }
+  ],
+  "asks": [
+    {
+      "price": 14286.0,
+      "amount": 0.70000000000000007
+    },
+	....
+    ,
+    {
+      "price": 14328.0,
+      "amount": 0.70000000000000007
+    }
+  ],
+  "timestamp": 1519893673210679
+}
+```
 
 **Request**
 `https://<client host:port>/v1/book/<symbol>/<exchange>`<br>
@@ -696,6 +741,33 @@ timestamp|long|The timestamp at which this information was valid
 ## Public Trades
 
 Get a list of the most recent trades for the given symbol.
+
+>JSON<br> *http://127.0.0.1:8082/v1/public_trades/BTC_USDT/VirtualMarket*
+
+```json
+{
+  "trades": [
+    {
+      "trade_id": "905974be-9f18-48cd-a49d-17b93cadbf30",
+      "side": "buy",
+      "symbol": "BTC_USDT",
+      "amount": 0.6,
+      "price": 185.0,
+      "exchange": "9568b326-6675-46f6-8df3-829b4a0471e6",
+      "timestamp": 1519732270706460
+    },
+    {
+      "trade_id": "d3903736-2438-11b2-b250-b747deb3124d",
+      "side": "buy",
+      "symbol": "BTC_USDT",
+      "amount": 0.1,
+      "price": 185.0,
+      "exchange": "9568b326-6675-46f6-8df3-829b4a0471e6",
+      "timestamp": 1519810104416206
+    }
+  ]
+}
+```
 
 **Request**
 `https://<client host:port>/v1/public_trades/<symbol>/<exchange>`
@@ -718,6 +790,21 @@ trades|array of trades |(below in table '*' marked)
 
 A list of symbol names and exchanges where this symbol is listed.
 
+>JSON<br> *http://127.0.0.1:8082/v1/symbols/VirtualMarket*
+
+```json
+{
+  "exchange": "VirtualMarket",
+  "pairs": [
+    "BTC_EUR",
+    "BTC_RUR",
+	....
+	"VIB_ETH",
+    "VIB_USDT"
+  ]
+}
+```
+
 **Request**
 `https://<client host:port>/v1/symbols/<exchange>`<br>
 Returns list of symbols for specified exchange.
@@ -734,6 +821,40 @@ or<br>
 `https://<client host:port>/v1/symbols`<br>
 Returns all known symbols wherever they are listed.
 
+>JSON<br> *http://127.0.0.1:8082/v1/symbols*
+
+```json
+{
+  "symbols": [
+    {
+      "pair": "BTC_EUR",
+      "exchanges": [
+        "VirtualMarket"
+      ]
+    },
+    {
+      "pair": "BTC_RUR",
+      "exchanges": [
+        "VirtualMarket"
+      ]
+    },
+	....
+	{
+      "pair": "VIB_ETH",
+      "exchanges": [
+        "VirtualMarket"
+      ]
+    },
+    {
+      "pair": "VIB_USDT",
+      "exchanges": [
+        "VirtualMarket"
+      ]
+    }
+  ]
+}
+```
+
 **Response details**
 
 Key|Type|Description
@@ -746,6 +867,22 @@ symbols|array of symbols| (below in table '*' marked)
 ## Symbol Details
 
 Get a list of valid symbol IDs and the pair details.
+
+>JSON<br> *http://127.0.0.1:8082/v1/symbol/BTC_USDT*
+
+```json
+{
+  "pair": "BTC_USDT",
+  "base_name": "USDT",
+  "base_long_name": null,
+  "settlement_name": "USDT",
+  "settlement_long_name": null,
+  "expiration": -9223372036854775808,
+  "exchanges": [
+    "VirtualMarket"
+  ]
+}
+```
 
 **Request**
 `https://<client host:port>/v1/symbol/<symbol>`<br>
@@ -833,11 +970,51 @@ Note: all Authenticated Endpoints use POST request
 
 See your balances
 
+>JSON<br> *http://127.0.0.1:8082/v1/balances/*
+
+>request
+
+```json
+ {
+  "account_id": null,
+  "currencies": null
+}
+```
+
+>responce
+
+```json
+{
+  "wallets": [
+    {
+      "account_id": "9568b326-6675-46f6-8df3-829b4a0471e6",
+      "balances": [
+        {
+          "currency": "BTC",
+          "amount": 300000.0,
+          "blocked": 0.0
+        },
+        {
+          "currency": "ETH",
+          "amount": 100000.0,
+          "blocked": 0.0
+        },
+        {
+          "currency": "USDT",
+          "amount": 300000.0,
+          "blocked": 0.0
+        }
+      ]
+    },
+	...
+  ]
+}
+```
+
 **Request**
 `https://<client host:port>/v1/balances`
 
 **Request details**
-
 
 Key|Type|Required|Description
 ---|----|--------|-----------
@@ -845,22 +1022,6 @@ account_id|string|N|Account identifier. If not specified, returns balances for a
 currencies|array of string|N|Currencies filter.
 
 **Response details**
-
->json
-
-```json
-{
-	"account_id" : "",
-	"balances" : [
-		{
-			"currency" : "",
-			"amount" : 0,
-			"blocked" : 0
-		}
-	]	
-}
-```
-
 
 Key|Type|Description
 ---|----|-----------
@@ -875,6 +1036,33 @@ wallets|array of wallets| (below in table '*' marked)
 ## New Order
 
 Submit a new Order
+
+>JSON<br> *http://127.0.0.1:8082/v1/order/new/*
+
+>request
+
+```json
+{
+  "client_order_id": "2b848174-243c-11b2-95a0-b747deb3124d",
+  "account_id": "9568b326-6675-46f6-8df3-829b4a0471e6",
+  "symbol": "BTC_USDT",
+  "side": "buy",
+  "amount": 0.1,
+  "price": 185.0,
+  "type": "limit"
+}
+```
+
+>responce
+
+```json
+{
+  "account_id": "9568b326-6675-46f6-8df3-829b4a0471e6",
+  "order_id": "c171ea8a-243e-11b2-91f0-47deb3124dc8",
+  "exchange_order_id": "2b848174-243c-11b2-95a0-b747deb3124d",
+  "timestamp": 1519895007075824
+}
+```
 
 **Request**
 `https://<client host:port>/v1/order/new`
@@ -904,6 +1092,27 @@ timestamp|long|Order creation time
 ## Move Order
 
 Change order attributes.
+
+>JSON<br> *http://127.0.0.1:8082/v1/order/move/*
+
+>request
+
+```json
+{
+  "client_order_id": "2b848174-243c-11b2-95a0-b747deb3124d",
+  "amount": 0.5,
+  "price": 18500.0,
+}
+```
+
+>responce
+
+```json
+{
+  "exchange_order_id": "2b848174-243c-11b2-95a0-b747deb3124d",
+  "timestamp": 1519895007075824
+}
+```
 
 <aside class="notice">
 Note: some of exchange does not provide functionality to change order. In this case Quants framework doing this work internally by canceling previous order and create new one. From API prospective it works same in all cases by sending one request /order/move.
@@ -936,6 +1145,22 @@ Note: order move operation does not change order identifier. Only ‘exchange_or
 
 Cancel an order
 
+>JSON<br> *http://127.0.0.1:8082/v1/order/cancel/*
+
+>request
+
+```json
+{
+  "client_order_id": "2b848174-243c-11b2-95a0-b747deb3124d",
+}
+```
+
+>responce
+
+```json
+{}
+```
+
 **Request**
 `https://<client host:port>/v1/order/cancel`
 
@@ -952,6 +1177,36 @@ Response is empty or error with description
 ## Order Status
 
 Get the status of an order. Is it active? Was it cancelled? To what extent has it been executed? etc.
+
+>JSON<br> *http://127.0.0.1:8082/v1/order/status/*
+
+>request
+
+```json
+{
+  "client_order_id": "2b848174-243c-11b2-95a0-b747deb3124d",
+}
+```
+
+>responce
+
+```json
+{
+  "client_order_id": "2b848174-243c-11b2-95a0-b747deb3124d",
+  "account_id": "9568b326-6675-46f6-8df3-829b4a0471e6",
+  "order_id": "70796e7e-2442-11b2-91f0-47deb3124dc8",
+  "exchange_order_id": "2b848174-243c-11b2-95a0-b747deb3124d",
+  "symbol": "BTC_USDT",
+  "side": "buy",
+  "state": "canceled",
+  "amount": 0.0,
+  "executed_amount": 0.0,
+  "remaining_amount": 0.0,
+  "price": 185.0,
+  "timestamp_submitted": 1519895604433220,
+  "timestamp_last_modified": 1519895606330911
+}
+```
 
 **Request**
 `https://<client host:port>/v1/order/status`
@@ -982,6 +1237,55 @@ timestamp_last_modified|long|Order last modification time
 ## Active Orders
 
 Response all active orders.
+
+>JSON<br> *http://127.0.0.1:8082/v1/order/orders/*
+
+>request
+
+```json
+{
+  "account_id": "9568b326-6675-46f6-8df3-829b4a0471e6",
+}
+```
+
+>responce
+
+```json
+{
+  "active_orders": [
+    {
+      "client_order_id": "e36b17b4-2007-11b2-beb0-9049f1f1bbe9",
+      "account_id": "9568b326-6675-46f6-8df3-829b4a0471e6",
+      "order_id": "471b215a-2053-11b2-beb0-be84e16cd6ae",
+      "exchange_order_id": "e36b17b4-2007-11b2-beb0-9049f1f1bbe9",
+      "symbol": "BTC_USDT",
+      "side": "buy",
+      "state": "active",
+      "amount": 0.1,
+      "executed_amount": 0.0,
+      "remaining_amount": 0.1,
+      "price": 185.0,
+      "timestamp_submitted": 1519732270706460,
+      "timestamp_last_modified": 1519732270706460
+    },
+    {
+      "client_order_id": "fc742d68-2232-11b2-9120-5e0d1c06b747",
+      "account_id": "9568b326-6675-46f6-8df3-829b4a0471e6",
+      "order_id": "38faa686-2233-11b2-93e0-6cd6ae529049",
+      "exchange_order_id": "fc742d68-2232-11b2-9120-5e0d1c06b747",
+      "symbol": "BTC_USDT",
+      "side": "buy",
+      "state": "active",
+      "amount": 0.1,
+      "executed_amount": 0.0,
+      "remaining_amount": 0.1,
+      "price": 185.0,
+      "timestamp_submitted": 1519810104416206,
+      "timestamp_last_modified": 1519810104416206
+    }
+  ]
+}
+```
 
 **Request**
 `https://<client host:port>/v1/order/orders`
@@ -1014,6 +1318,20 @@ active_orders| array of `active_order`|(below in table '*' marked)
 ## Trades
 
 Get list of own trades
+
+>JSON<br> **
+
+>request
+
+```json
+
+```
+
+>responce
+
+```json
+
+```
 
 **Request**
 `https://<client host:port>/v1/order/trades`
@@ -1051,6 +1369,20 @@ Note: response is limited by 50000 trades. When number of trades in specified ra
 
 ## Get deposit address
 
+>JSON<br> **
+
+>request
+
+```json
+
+```
+
+>responce
+
+```json
+
+```
+
 **Request**
 `https://<client host:port>/v1/get_deposit_address`
 
@@ -1070,6 +1402,20 @@ payment_id|string|Used to identify transactions to merchants and exchanges.
 
 
 ## Withdraw
+
+>JSON<br> **
+
+>request
+
+```json
+
+```
+
+>responce
+
+```json
+
+```
 
 **Rrequest**
 `https://<client host:port>/v1/withdraw`
@@ -1092,6 +1438,20 @@ success|boolean|
 
 
 ## Get withdraw transactions
+
+>JSON<br> **
+
+>request
+
+```json
+
+```
+
+>responce
+
+```json
+
+```
 
 **Rrequest**
 `https://<client host:port>/v1/get_withdraw_transactions`
@@ -1122,6 +1482,20 @@ withdraw_transactions|array of transactions| (below in table '*' marked)
 
 
 ## Get deposit transactions
+
+>JSON<br> **
+
+>request
+
+```json
+
+```
+
+>responce
+
+```json
+
+```
 
 **Rrequest**
 `https://<client host:port>/v1/get_deposit_transactions`
